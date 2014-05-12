@@ -1134,7 +1134,7 @@ pid_t start_child(CmdOptions& op, std::string& error)
             if (tcsetattr(0, TCSANOW, &ios) < 0) {
                 err.write("Cannot disable pty echo");
                 perror(err.c_str());
-                return EXIT_FAILURE;
+                _exit( EXIT_FAILURE );
             }
 
             // Make the current process a new session leader
@@ -1157,14 +1157,14 @@ pid_t start_child(CmdOptions& op, std::string& error)
         < 0) {
             err.write("Cannot set effective user to %d", op.user());
             perror(err.c_str());
-            return EXIT_FAILURE;
+            _exit( EXIT_FAILURE );
         }
         #endif
 
         if (op.group() != INT_MAX && setgid(op.group()) < 0) {
             err.write("Cannot set effective group to %d", op.group());
             perror(err.c_str());
-            return EXIT_FAILURE;
+            _exit( EXIT_FAILURE );
         }
 
         // Build the command arguments list
@@ -1186,13 +1186,13 @@ pid_t start_child(CmdOptions& op, std::string& error)
         if (op.cd() != NULL && op.cd()[0] != '\0' && chdir(op.cd()) < 0) {
             err.write("Cannot chdir to '%s'", op.cd());
             perror(err.c_str());
-            return EXIT_FAILURE;
+            _exit( EXIT_FAILURE );
         }
 
         // Setup process environment
         if (op.init_cenv() < 0) {
             perror(err.c_str());
-            return EXIT_FAILURE;
+            _exit( EXIT_FAILURE );
         }
 
         const char* executable = op.executable().empty()
@@ -1206,7 +1206,7 @@ pid_t start_child(CmdOptions& op, std::string& error)
             // send SIGCHLD to the parent. We use this brutal SIGSEGV to
             // ensure proper signal delivery to parent
             int* p = 0; *p = 0;
-            return EXIT_FAILURE;
+            _exit( EXIT_FAILURE );
         }
         // On success execve never returns
         return EXIT_FAILURE;
